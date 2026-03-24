@@ -1,10 +1,10 @@
 # Fine-Grained Tool Access Control for OpenClaw
 
-Deterministic, robust, and fine-grained access control for your [OpenClaw](https://openclaw.ai) agents. Ensure that your agent's actions are always within safe, predefined boundaries.
+Deterministic, robust, and fine-grained access control for your [OpenClaw](https://openclaw.ai) agents. Keep your agents' actions within safe, predefined boundaries at all times.
 
 ---
 
-## 🚀 Why This Plugin?
+## Why This Plugin?
 
 While prompt-based defenses (system prompts) can guide agent behavior, they are inherently non-deterministic. LLMs might bypass instructions when under pressure or carefully prompted (prompt injection).
 
@@ -65,7 +65,7 @@ The plugin follows a secure-by-default model:
 2. **Grant policies are evaluated second**: If a match is found, the tool call is permitted.
 3. **Implicit Deny**: If no policies match, the tool call is denied.
 
-This logic supports a "Grant everything except..." model using deny policies, although explicit "Grant only..." models are recommended for higher security.
+This logic supports a "Grant everything except…" pattern using deny policies; however, explicit "Grant only…" allow-lists are recommended for higher security.
 
 ## Rule Grammar & Operators
 
@@ -125,16 +125,15 @@ Configuration is managed in `config.json`:
   - `off`: Plugin is inactive.
   - `monitor`: Policies are evaluated and logged, but actions are never blocked. Use this mode to test tool calls in a playground environment before moving to a "production" environment with "on" mode (see details in "Add from Logs").
 - **port**: The port for the local Admin UI.
-- **caseSensitive**: Set to `true` for exact casing requirements; it is recommended to use `false`.
+- **caseSensitive**: Set to `true` for exact casing requirements; use `false` (the default) for case-insensitive matching.
 - **policies**: An array of policy objects.
   - **toolName**: Array of tool names or `["*"]` or `[]` for all tools.
   - **sessionKey**: Array of session keys or `["*"]` or `[]` for all sessions.
   - **condition**: The logic expression (e.g., `params.command == 'ls' and ...`; `toolName` and `sessionKey` can also be used in the condition, e.g., `sessionKey like 'agent:main:tui-*'`).
   - **desc**: Description of the policy (returned as the reason if blocked).
 - The default policy is to grant access to all tools from the main session.
-## Installation
 
-### Installation
+## Installation
 
 1.  **Clone the repository** to your local machine.
 2.  **Install the plugin**:
@@ -148,7 +147,7 @@ Configuration is managed in `config.json`:
 
 ## Admin UI
 
-You can edit `config.json` to change settings and policy, or use Admin UI.
+You can edit `config.json` directly to change settings and policies, or use the Admin UI.
 
 #### Policy Editor
 Manage all your rules with a clean, visual interface:
