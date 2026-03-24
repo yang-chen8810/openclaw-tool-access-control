@@ -1,10 +1,17 @@
-# OpenClaw Access Control Plugin
+# Fine-Grained Tool Access Control for OpenClaw
 
-Deterministic and fine-grained access control for OpenClaw tool calls.
+Deterministic, robust, and fine-grained access control for your [OpenClaw](https://openclaw.ai) agents. Ensure that your agent's actions are always within safe, predefined boundaries.
 
-## Why this plugin?
+---
 
-While prompt-based protection (system prompts) can guide agent behavior, it is not always reliable as LLM outputs are non-deterministic. However, tools are how agents act upon the world. By implementing deterministic access control at the tool level, you can ensure your agent's actions are always within safe boundaries.
+## 🚀 Why This Plugin?
+
+While prompt-based defenses (system prompts) can guide agent behavior, they are inherently non-deterministic. LLMs might bypass instructions when under pressure or carefully prompted (prompt injection).
+
+**Tools are the bridge between agents and the world.** By implementing **deterministic access control** at the tool level, you create a robust safety layer:
+- **Zero Drift**: Decisions are made using hard-coded rules, not LLM reasoning.
+- **Deep Inspection**: Inspect not just *which* tool is called, but the exact **parameters** being passed (e.g., specific file paths, URLs, or shell commands).
+- **Secure by Default**: Block everything unless explicitly permitted.
 
 OpenClaw itself provides [coarse-grained tool configuration](https://docs.openclaw.ai/tools#tool-configuration) which allows enabling/disabling tools globally or per session. This plugin extends that capability by providing **fine-grained access control**, allowing policies to grant or deny access based on:
 - Tool Name
@@ -12,6 +19,14 @@ OpenClaw itself provides [coarse-grained tool configuration](https://docs.opencl
 - **Parameters** (deep inspection of tool arguments)
 
 This plugin uses the `before_tool_call` hook to intercept tool call commands and evaluate policies to allow or deny the execution.
+For a tool to be accessible by an agent, it must be permitted by both OpenClaw's global configuration and this plugin's policies. Alternatively, you can set `allow: ["*"]` in OpenClaw and delegate full access control to this plugin.
+
+```json
+"tools": {
+  "allow": ["*"]
+}
+```
+
 
 ### Example Policy
 ```json
@@ -108,29 +123,28 @@ Configuration is managed in `config.json`:
 - **mode**:
   - `on`: Policies are strictly enforced.
   - `off`: Plugin is inactive.
-  - `monitor`: Policies are evaluated and logged, but actions are never blocked. Use this mode to try and enable safe tool calls (see details in "Add from Logs").
+  - `monitor`: Policies are evaluated and logged, but actions are never blocked. Use this mode to test tool calls in a playground environment before moving to a "production" environment with "on" mode (see details in "Add from Logs").
 - **port**: The port for the local Admin UI.
-- **caseSensitive**: Set to `true` for exact casing requirements, recommend use `false`.
+- **caseSensitive**: Set to `true` for exact casing requirements; it is recommended to use `false`.
 - **policies**: An array of policy objects.
   - **toolName**: Array of tool names or `["*"]` or `[]` for all tools.
   - **sessionKey**: Array of session keys or `["*"]` or `[]` for all sessions.
-  - **condition**: The logic expression (e.g., `params.command = 'ls' and ...`, toolName and sessionKey can also be used in condition, e.g. `sessionKey like 'agent:main:tui-*'`).
+  - **condition**: The logic expression (e.g., `params.command == 'ls' and ...`; `toolName` and `sessionKey` can also be used in the condition, e.g., `sessionKey like 'agent:main:tui-*'`).
   - **desc**: Description of the policy (returned as the reason if blocked).
-- The default policy is to grant access to all tools from main session.
+- The default policy is to grant access to all tools from the main session.
 ## Installation
 
-### From Source
-1. Download or clone this repository.
-2. Build the plugin:
-   ```bash
-   npm run build
-   ```
-3. Install into OpenClaw:
-   ```bash
-   openclaw plugins install <path to dist folder>
-   # OR
-   openclaw plugins install <path to fg-tool-access-control.zip>
-   ```
+### Installation
+
+1.  **Clone the repository** to your local machine.
+2.  **Install the plugin**:
+    -   **Quick Install**:
+        `openclaw plugins install <path to fg-tool-access-control.zip>`
+    -   **Build from Source**:
+        ```bash
+        npm run build
+        openclaw plugins install <path to dist folder>
+        ```
 
 ## Admin UI
 
@@ -144,10 +158,10 @@ Manage all your rules with a clean, visual interface:
 Instantly create new policies from recent tool execution history:
 ![Creating Policies from Logs](assets/images/admin_log.png)
 
-- **Start UI**: `npm run server` (starts on the port defined in `config.json`).
+- **Start UI**: `npm run server` in the plugin folder, normally located at `<openclaw_home>/extensions/fg-tool-access-control` (starts on the port defined in `config.json`).
 - **Features**: Edit policies directly, view logs, and create new policies instantly from recent tool execution history.
-- **Hot Reload**: The plugin automatically reloads saved configurations every 60 seconds.
-- **Security**: Shut down the admin UI when not in use.
+- **Hot Reload**: The plugin automatically reloads the configuration every 60 seconds.
+- **Security**: Shut down the Admin UI when not in use.
 
 ## Security Best Practices
 
