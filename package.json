@@ -1,7 +1,7 @@
 {
   "name": "fg-tool-access-control",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "description": "Access control plugin for OpenClaw with ANTLR-based rule evaluation",
   "main": "index.js",
   "scripts": {
