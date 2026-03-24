@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Policy Admin</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e293b',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        /* Custom Scrollbar for dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        [v-cloak] { display: none; }
+        
+        /* Guaranteed alternating row colors */
+        .policy-even {
+            background-color: #080c16; /* Deep Dark Blue */
+            border-color: #1a2333;
+        }
+        .policy-odd {
+            background-color: #263248; /* Muted Slate Blue */
+            border-color: #3d4b63;
+        }
+    </style>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+<div id="app" v-cloak class="flex-grow flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-secondary bg-opacity-80 backdrop-blur-md border-b border-gray-700 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <i class="ph ph-shield-check text-3xl text-primary"></i>
+                    <span class="font-bold text-xl tracking-tight">OpenClaw Tool Access Policies</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button @click="undoChanges" :disabled="!hasUnsavedChanges" :class="{'opacity-50 cursor-not-allowed': !hasUnsavedChanges, 'hover:bg-gray-700': hasUnsavedChanges}" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 font-medium transition">
+                        <i class="ph ph-arrow-u-up-left"></i>
+                        <span>Undo</span>
+                    </button>
+                    <button @click="saveConfig" :disabled="!hasUnsavedChanges" :class="{'opacity-50 cursor-not-allowed': !hasUnsavedChanges, 'hover:scale-105 shadow-lg shadow-blue-500/30': hasUnsavedChanges}" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-primary text-white font-semibold transition transform duration-200">
+                        <i class="ph ph-floppy-disk"></i>
+                        <span>Save Changes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- Plugin Settings -->
+        <section class="bg-secondary rounded-2xl p-6 border border-gray-700 shadow-xl">
+            <h2 class="text-2xl font-bold mb-6 flex items-center space-x-2">
+                <i class="ph ph-gear text-gray-400"></i>
+                <span>Plugin Settings</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Mode Toggle -->
+                <div class="flex items-center justify-between p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                    <div>
+                        <h3 class="font-semibold text-lg">Enforcement Mode</h3>
+                        <p class="text-sm text-gray-400">Determine how policies are applied securely.</p>
+                    </div>
+                    <select v-model="config.mode" @change="markDirty" class="bg-gray-900 border border-gray-600 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 outline-none">
+                        <option value="on">On (Enforce)</option>
+                        <option value="monitor">Monitor (Log Only)</option>
+                        <option value="off">Off (Allow All)</option>
+                    </select>
+                </div>
+
+                <!-- Case Sensitive Toggle -->
+                <div class="flex items-center justify-between p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                    <div>
+                        <h3 class="font-semibold text-lg">Case Sensitivity</h3>
+                        <p class="text-sm text-gray-400">Match strings with exact casing.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" v-model="config.caseSensitive" @change="markDirty" class="sr-only peer">
+                        <div class="w-14 h-7 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Policies -->
+        <section class="bg-secondary rounded-2xl border border-gray-700 shadow-xl overflow-hidden flex flex-col relative">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800/20">
+                <h2 class="text-2xl font-bold flex items-center space-x-2">
+                    <i class="ph ph-shield text-gray-400"></i>
+                    <span>Access Policies</span>
+                </h2>
+                <div class="flex space-x-3">
+                    <button @click="openLogModal('top')" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition shadow-lg shadow-indigo-500/20">
+                        <i class="ph ph-magic-wand"></i>
+                        <span>Add from Log</span>
+                    </button>
+                    <button @click="addPolicy('top')" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium transition">
+                        <i class="ph ph-plus-circle"></i>
+                        <span>New Policy</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Policy Filters -->
+            <div class="px-6 py-4 bg-gray-800/10 border-b border-gray-700 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Filter by Type</label>
+                    <select v-model="policyFilterType" class="w-full rounded-lg bg-gray-900 border border-gray-600 text-sm p-2 outline-none">
+                        <option value="">All Types</option>
+                        <option v-for="opt in policyTypeOptions" :value="opt">{{opt.charAt(0).toUpperCase() + opt.slice(1)}}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Filter by Tool</label>
+                    <select v-model="policyFilterTool" class="w-full rounded-lg bg-gray-900 border border-gray-600 text-sm p-2 outline-none">
+                        <option value="">All Tools</option>
+                        <option v-for="opt in policyToolOptions" :value="opt">{{opt}}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Filter by Session</label>
+                    <select v-model="policyFilterSession" class="w-full rounded-lg bg-gray-900 border border-gray-600 text-sm p-2 outline-none">
+                        <option value="">All Sessions</option>
+                        <option v-for="opt in policySessionOptions" :value="opt">{{opt}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div v-if="filteredPolicies.length === 0" class="text-center py-12 text-gray-400 border-2 border-dashed border-gray-700 rounded-xl">
+                    <i class="ph ph-folder-open text-5xl mb-3 opacity-50"></i>
+                    <p class="text-lg">No policies match your filters.</p>
+                </div>
+                <transition-group name="list" tag="div" class="space-y-4">
+                    <div v-for="(item, index) in filteredPolicies" :key="item.originalIndex" :class="index % 2 === 0 ? 'policy-even' : 'policy-odd'" class="rounded-xl p-5 border relative group transition hover:border-white/30">
+                        
+                        <!-- Delete specific button -->
+                        <button @click="deletePolicy(item.originalIndex)" class="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition bg-gray-800 rounded-full p-2 opacity-0 group-hover:opacity-100">
+                            <i class="ph ph-trash text-lg"></i>
+                        </button>
+
+                        <!-- Policy Description -->
+                        <div class="mb-4 mr-8">
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Description</label>
+                            <input type="text" :value="item.p.desc" @input="updateField(item.p, 'desc', $event.target.value)" class="w-full rounded-lg bg-gray-800 border border-gray-600 text-white text-sm p-2.5 focus:ring-primary focus:border-primary outline-none" placeholder="Explain the purpose of this policy...">
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mr-8">
+                            
+                            <!-- Policy Type -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Type</label>
+                                <select :value="item.p.type" @change="updateField(item.p, 'type', $event.target.value)" :class="item.p.type === 'grant' ? 'text-green-400 border-green-400/30 bg-green-900/10' : 'text-red-400 border-red-400/30 bg-red-900/10'" class="w-full rounded-lg border text-sm font-semibold p-2.5 outline-none focus:ring-1 focus:ring-opacity-50">
+                                    <option value="grant" class="text-white bg-gray-900">Grant</option>
+                                    <option value="deny" class="text-white bg-gray-900">Deny</option>
+                                </select>
+                            </div>
+
+                            <!-- Tool Names -->
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Tool Names (comma separated)</label>
+                                <input type="text" :list="'toolHintList' + index" :value="item.p.toolNameRaw" @input="updateArray(item.p, 'toolName', $event.target.value)" class="w-full rounded-lg bg-gray-800 border border-gray-600 text-white text-sm p-2.5 focus:ring-primary focus:border-primary outline-none" placeholder="*">
+                                <datalist :id="'toolHintList' + index">
+                                    <option v-for="t in hints.toolNames" :value="t">{{t}}</option>
+                                    <option value="*">All Tools (*)</option>
+                                </datalist>
+                            </div>
+
+                            <!-- Session Keys -->
+                            <div class="relative">
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Session Keys (comma separated)</label>
+                                <input type="text" :list="'sessionHintList' + index" :value="item.p.sessionKeyRaw" @input="updateArray(item.p, 'sessionKey', $event.target.value)" class="w-full rounded-lg bg-gray-800 border border-gray-600 text-white text-sm p-2.5 focus:ring-primary focus:border-primary outline-none" placeholder="*">
+                                <datalist :id="'sessionHintList' + index">
+                                    <option v-for="s in hints.sessionKeys" :value="s">{{s}}</option>
+                                    <option value="*">All Sessions (*)</option>
+                                </datalist>
+                            </div>
+                        </div>
+
+                        <!-- Full-width Condition -->
+                        <div class="mt-4 mr-8">
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Condition Expression</label>
+                            <input type="text" :value="item.p.condition" @input="updateField(item.p, 'condition', $event.target.value)" class="w-full rounded-lg bg-gray-800 border border-gray-600 text-white text-sm font-mono p-2.5 focus:ring-primary focus:border-primary outline-none" placeholder="">
+                        </div>
+                    </div>
+                </transition-group>
+
+                <!-- Bottom Buttons -->
+                <div v-if="config.policies.length > 0" class="flex justify-end space-x-3 pt-6 border-t border-gray-700 mt-6">
+                    <button @click="openLogModal('bottom')" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition shadow-lg shadow-indigo-500/20">
+                        <i class="ph ph-magic-wand"></i>
+                        <span>Add from Log</span>
+                    </button>
+                    <button @click="addPolicy('bottom')" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-medium transition">
+                        <i class="ph ph-plus-circle"></i>
+                        <span>New Policy</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Logs -->
+    <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="relative w-full max-w-5xl bg-secondary rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-full">
+            <div class="flex justify-between items-center p-5 border-b border-gray-700 bg-gray-800/30 rounded-t-2xl">
+                <h3 class="text-xl font-bold flex items-center space-x-2">
+                    <i class="ph ph-scroll"></i>
+                    <span>Recent Tool Execution Logs</span>
+                </h3>
+                <div class="flex items-center space-x-4">
+                    <button @click="fetchLogs" class="text-gray-400 hover:text-white transition flex items-center space-x-1" title="Refresh Logs">
+                        <i class="ph ph-arrows-clockwise text-xl" :class="{'animate-spin': isFetchingLogs}"></i>
+                    </button>
+                    <button @click="closeLogModal" class="text-gray-400 hover:text-red-400 transition" title="Close">
+                        <i class="ph ph-x text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-5 border-b border-gray-700 bg-gray-800/50 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Filter by Tool</label>
+                    <select v-model="logFilterTool" class="w-full rounded-lg bg-gray-900 border border-gray-600 text-sm p-2 outline-none">
+                        <option value="">All Tools</option>
+                        <option v-for="t in hints.toolNames" :value="t">{{t}}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Filter by Session</label>
+                    <select v-model="logFilterSession" class="w-full rounded-lg bg-gray-900 border border-gray-600 text-sm p-2 outline-none">
+                        <option value="">All Sessions</option>
+                        <option v-for="s in hints.sessionKeys" :value="s">{{s}}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Filter by Access Result</label>
+                    <select v-model="logFilterAccessResult" class="w-full rounded-lg bg-gray-900 border border-gray-600 text-sm p-2 outline-none">
+                        <option value="">All Results</option>
+                        <option value="notChecked">Not Checked</option>
+                        <option value="permit">Permit</option>
+                        <option value="deny">Deny</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-5 overflow-y-auto flex-grow space-y-4">
+                <div v-if="filteredLogs.length === 0" class="text-center py-8 text-gray-500">
+                    <p>No logs match your filter criteria.</p>
+                </div>
+                <div v-for="(log, i) in filteredLogs" :key="tempId(log, i)" class="bg-gray-900 rounded-xl border border-gray-700 p-4">
+                    <div class="flex justify-between items-start mb-3 border-b border-gray-800 pb-3">
+                        <div class="flex flex-col">
+                            <span class="text-indigo-400 font-mono font-bold">{{log.toolName}}</span>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <span class="text-xs text-gray-500">{{new Date(log.timestamp).toLocaleString()}} | <span class="bg-gray-800 px-1 rounded">{{log.sessionKey || 'No Session'}}</span></span>
+                                <span v-if="log.accessResult" :class="{
+                                    'bg-green-900/30 text-green-400 border-green-500/30': log.accessResult === 'permit',
+                                    'bg-red-900/30 text-red-400 border-red-500/30': log.accessResult === 'deny',
+                                    'bg-gray-800 text-gray-400 border-gray-600': log.accessResult === 'notChecked'
+                                }" class="text-[10px] px-1.5 py-0.5 rounded border font-bold uppercase tracking-wider">
+                                    {{log.accessResult}}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button @click="addFromLog(log, 'tool')" class="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded transition font-medium">Add Tool</button>
+                            <button @click="addFromLog(log, 'tool_session')" class="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded transition font-medium">Add Tool and Session</button>
+                            <button @click="addFromLog(log, 'request')" class="text-xs px-2 py-1 bg-indigo-900/50 text-indigo-300 hover:bg-indigo-800/80 border border-indigo-700/50 rounded transition font-medium">Add Tool, Session and Params</button>
+                        </div>
+                    </div>
+                    <div class="text-sm font-mono text-gray-300 bg-black/40 p-3 rounded-lg overflow-x-auto whitespace-pre">
+                        {{JSON.stringify(log, null, 2)}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

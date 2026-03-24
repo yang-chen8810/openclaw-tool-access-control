@@ -1,0 +1,33 @@
+{
+  "name": "fg-tool-access-control",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Access control plugin for OpenClaw with ANTLR-based rule evaluation",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs",
+    "build": "rm -rf dist fg-tool-access-control.zip && tsc && cp -r src/admin-ui/public dist/admin-ui/ && cp package.json config.json openclaw.plugin.json system.policy.json dist/ && (cd dist && zip -r ../fg-tool-access-control.zip .)",
+    "prepublishOnly": "npm run build",
+    "antlr4": "cd src/antlr4 && java -Xmx500M -cp \"../../antlr-4.13.1-complete.jar\" org.antlr.v4.Tool -Dlanguage=TypeScript -visitor -listener -o . RuleExpr.g4",
+    "server": "node admin-ui/server.js"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ]
+  },
+  "keywords": [],
+  "author": "yang-chen8810",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "antlr4": "^4.13.2",
+    "openclaw": "^2026.3.13"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.4.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
+  }
+}

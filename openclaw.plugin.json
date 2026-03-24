@@ -1,0 +1,57 @@
+{
+  "id": "fg-tool-access-control",
+  "name": "Fine Grained Tool Access Control Plugin",
+  "version": "1.0.0",
+  "description": "Provides fine-grained access control for tool calls based on configurable policies.",
+  "author": "yang-chen8810",
+  "license": "Apache-2.0",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "mode": {
+        "type": "string",
+        "enum": ["on", "off", "monitor"],
+        "default": "off"
+      },
+      "port": {
+        "type": "number",
+        "default": 8080
+      },
+      "caseSensitive": {
+        "type": "boolean",
+        "default": true
+      },
+      "startLocalAdminUI": {
+        "type": "boolean",
+        "default": false
+      },
+      "policies": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["grant", "deny"]
+            },
+            "toolName": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "sessionKey": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "condition": {
+              "type": "string"
+            },
+            "desc": {
+              "type": "string"
+            }
+          },
+          "required": ["type", "toolName", "sessionKey", "condition"]
+        }
+      }
+    }
+  }
+}

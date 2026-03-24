@@ -1,0 +1,25 @@
+# Generated intermediate artifacts, but keep TS source files
+src/antlr4/*.tokens
+src/antlr4/*.interp
+
+# Dependencies
+node_modules/
+
+# Logs
+log.txt
+logs/
+
+# Build
+dist/
+build/
+*.js
+!src/admin-ui/public/app.js
+*.js.map
+*.d.ts
+*.d.ts.map
+# Temp debug files
+build_errors*.txt
+
+# Binaries
+*.jar
+
