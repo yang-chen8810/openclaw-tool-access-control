@@ -135,15 +135,20 @@ Configuration is managed in `config.json`:
 
 ## Installation
 
-1.  **Clone the repository** to your local machine.
-2.  **Install the plugin**:
-    -   **Quick Install**:
-        `openclaw plugins install <path to fg-tool-access-control.zip>`
-    -   **Build from Source**:
-        ```bash
-        npm run build
-        openclaw plugins install <path to dist folder>
-        ```
+1.  **Quick Install**:
+    Download `fg-tool-access-control.zip` and run:
+    ```bash
+    openclaw plugins install <path to fg-tool-access-control.zip>
+    ```
+    *(Note: If you encounter an "unexpected archive layout" error, unzip the file to a folder and run `openclaw plugins install <path to folder>` instead, or use the Build from Source method below.)*
+
+2.  **Build from Source**:
+    Clone the repository to your local machine and run:
+    ```bash
+    npm install
+    npm run build
+    openclaw plugins install ./dist
+    ```
 
 ## Admin UI
 
