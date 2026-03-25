@@ -2,6 +2,9 @@
 
 Deterministic, robust, and fine-grained access control for your [OpenClaw](https://openclaw.ai) agents. Keep your agents' actions within safe, predefined boundaries at all times.
 
+GitHub Repository: [https://github.com/yang-chen8810/openclaw-tool-access-control](https://github.com/yang-chen8810/openclaw-tool-access-control)
+
+
 ---
 
 ## Why This Plugin?
@@ -143,8 +146,10 @@ Configuration is managed in `config.json`:
     *(Note: If you encounter an "unexpected archive layout" error, unzip the file to a folder and run `openclaw plugins install <path to folder>` instead, or use the Build from Source method below.)*
 
 2.  **Build from Source**:
-    Clone the repository to your local machine and run:
+    Clone the repository to your local machine:
     ```bash
+    git clone https://github.com/yang-chen8810/openclaw-tool-access-control.git
+    cd openclaw-tool-access-control
     npm install
     npm run build
     openclaw plugins install ./dist
