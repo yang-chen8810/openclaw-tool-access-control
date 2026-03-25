@@ -149,6 +149,7 @@ Configuration is managed in `config.json`:
     npm run build
     openclaw plugins install ./dist
     ```
+    *(Note: If you need to rebuild the grammar using `npm run antlr4`, download the [ANTLR 4 complete JAR](https://www.antlr.org/download.html) and place it in the project root as `antlr-complete.jar`.)*
 
 ## Admin UI
 

@@ -8,7 +8,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs",
     "build": "rm -rf dist fg-tool-access-control.zip && tsc && cp -r src/admin-ui/public dist/admin-ui/ && cp package.json config.json openclaw.plugin.json system.policy.json dist/ && (cd dist && zip -r ../fg-tool-access-control.zip .)",
     "prepublishOnly": "npm run build",
-    "antlr4": "cd src/antlr4 && java -Xmx500M -cp \"../../antlr-4.13.1-complete.jar\" org.antlr.v4.Tool -Dlanguage=TypeScript -visitor -listener -o . RuleExpr.g4",
+    "antlr4": "cd src/antlr4 && java -Xmx500M -cp \"../../antlr-complete.jar\" org.antlr.v4.Tool -Dlanguage=TypeScript -visitor -listener -o . RuleExpr.g4",
     "server": "node admin-ui/server.js"
   },
   "openclaw": {
