@@ -2,7 +2,7 @@
   "name": "fg-tool-access-control",
   "type": "module",
   "version": "1.0.0-beta.1",
-  "description": "Access control plugin for OpenClaw with ANTLR-based rule evaluation",
+  "description": "Fine-grained access control for OpenClaw tool calls. https://github.com/yang-chen8810/openclaw-tool-access-control",
   "main": "index.js",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs",
