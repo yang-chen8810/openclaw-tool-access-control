@@ -12,6 +12,9 @@
     "server": "node admin-ui/server.js"
   },
   "openclaw": {
+    "compat": {
+      "pluginApi": "^1.0.0"
+    },
     "extensions": [
       "./index.js"
     ]
