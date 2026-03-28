@@ -86,7 +86,7 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
         }
     }
 
-    private eval(ctx: any): any {
+    private evaluateInternal(ctx: any): any {
         if (!ctx) return null;
         try {
             return (this as any).visit(ctx);
@@ -97,15 +97,15 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
     }
 
     visitParse = (ctx: ParseContext): any => {
-        return this.eval(ctx.expression());
+        return this.evaluateInternal(ctx.expression());
     }
 
     visitParenExp = (ctx: ParenExpContext): any => {
-        return this.eval(ctx.expression());
+        return this.evaluateInternal(ctx.expression());
     }
 
     visitNotExp = (ctx: NotExpContext): any => {
-        const val = this.eval(ctx.expression());
+        const val = this.evaluateInternal(ctx.expression());
         if (val === ERROR) return ERROR;
         if (val === null) return null;
 
@@ -117,8 +117,8 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
     }
 
     visitAndExp = (ctx: AndExpContext): any => {
-        const left = this.eval(ctx._left);
-        const right = this.eval(ctx._right);
+        const left = this.evaluateInternal(ctx._left);
+        const right = this.evaluateInternal(ctx._right);
 
         if (left === ERROR || right === ERROR) return ERROR;
 
@@ -140,8 +140,8 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
     }
 
     visitOrExp = (ctx: OrExpContext): any => {
-        const left = this.eval(ctx._left);
-        const right = this.eval(ctx._right);
+        const left = this.evaluateInternal(ctx._left);
+        const right = this.evaluateInternal(ctx._right);
 
         if (left === ERROR || right === ERROR) return ERROR;
 
@@ -163,8 +163,8 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
     }
 
     visitCompExp = (ctx: CompExpContext): any => {
-        const left = this.eval(ctx._left);
-        const right = this.eval(ctx._right);
+        const left = this.evaluateInternal(ctx._left);
+        const right = this.evaluateInternal(ctx._right);
         const op = (ctx as any).getChild(1).getText();
 
         if (left === ERROR || right === ERROR) return ERROR;
@@ -249,13 +249,13 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
     }
 
     visitPrimaryExp = (ctx: PrimaryExpContext): any => {
-        return this.eval(ctx.primary());
+        return this.evaluateInternal(ctx.primary());
     }
 
     visitPrimary = (ctx: PrimaryContext): any => {
-        if (ctx.literal()) return this.eval(ctx.literal());
-        if (ctx.attribute()) return this.eval(ctx.attribute());
-        if (ctx.functionCall()) return this.eval(ctx.functionCall());
+        if (ctx.literal()) return this.evaluateInternal(ctx.literal());
+        if (ctx.attribute()) return this.evaluateInternal(ctx.attribute());
+        if (ctx.functionCall()) return this.evaluateInternal(ctx.functionCall());
         return null;
     }
 
@@ -284,7 +284,7 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
             return new Date(val);
         }
         if (ctx.array()) {
-            return this.eval(ctx.array());
+            return this.evaluateInternal(ctx.array());
         }
         return null;
     }
@@ -293,7 +293,7 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
         const list: any[] = [];
         const literals = ctx.literal_list();
         for (const literalCtx of literals) {
-            const item = this.eval(literalCtx);
+            const item = this.evaluateInternal(literalCtx);
             if (item === ERROR) return ERROR;
             list.push(item);
         }
@@ -301,7 +301,7 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
     }
 
     visitAttribute = (ctx: AttributeContext): any => {
-        return this.eval(ctx.jsonPath());
+        return this.evaluateInternal(ctx.jsonPath());
     }
 
     visitJsonPath = (ctx: JsonPathContext): any => {
@@ -363,7 +363,7 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
         
         const functionArgs = ctx.functionArg_list();
         for (const argCtx of functionArgs) {
-            const argVal = this.eval(argCtx);
+            const argVal = this.evaluateInternal(argCtx);
             if (argVal === ERROR) return ERROR;
             args.push(argVal);
         }
@@ -442,8 +442,8 @@ export class RuleExprEvaluator extends RuleExprVisitor<any> {
     }
 
     visitFunctionArg = (ctx: FunctionArgContext): any => {
-        if (ctx.literal()) return this.eval(ctx.literal());
-        if (ctx.attribute()) return this.eval(ctx.attribute());
+        if (ctx.literal()) return this.evaluateInternal(ctx.literal());
+        if (ctx.attribute()) return this.evaluateInternal(ctx.attribute());
         return null;
     }
 
