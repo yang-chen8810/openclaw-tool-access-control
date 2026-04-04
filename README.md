@@ -3,6 +3,8 @@
 Deterministic, robust, and fine-grained access control for your [OpenClaw](https://openclaw.ai) agents. Keep your agents' actions within safe, predefined boundaries at all times.
 
 GitHub Repository: [https://github.com/yang-chen8810/openclaw-tool-access-control](https://github.com/yang-chen8810/openclaw-tool-access-control)
+Medium Article: [Fine-Grained Access Control for OpenClaw](https://medium.com/@yangchen8810/fine-grained-access-control-for-openclaw-08bc6070b6de)
+
 
 
 ---
@@ -138,14 +140,21 @@ Configuration is managed in `config.json`:
 
 ## Installation
 
-1.  **Quick Install**:
+1.  **ClawHub (Recommended)**:
+    Install directly using the ClawHub registry:
+    ```bash
+    openclaw plugins install clawhub:fg-tool-access-control
+    ```
+
+2.  **Quick Install**:
     Download `fg-tool-access-control.zip` and run:
     ```bash
     openclaw plugins install <path to fg-tool-access-control.zip>
     ```
     *(Note: If you encounter an "unexpected archive layout" error, unzip the file to a folder and run `openclaw plugins install <path to folder>` instead, or use the Build from Source method below.)*
 
-2.  **Build from Source**:
+3.  **Build from Source**:
+
     Clone the repository to your local machine:
     ```bash
     git clone https://github.com/yang-chen8810/openclaw-tool-access-control.git
