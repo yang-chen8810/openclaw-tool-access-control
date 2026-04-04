@@ -1,0 +1,18 @@
+{
+  "mode": "on",
+  "port": 8080,
+  "caseSensitive": false,
+  "policies": [
+    {
+      "type": "grant",
+      "toolName": [
+        "*"
+      ],
+      "sessionKey": [
+        "agent:main:main"
+      ],
+      "condition": "",
+      "desc": "Grant access to all tools from main session"
+    }
+  ]
+}

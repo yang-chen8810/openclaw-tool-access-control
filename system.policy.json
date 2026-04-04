@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "description": "policy to protect this plugin itself from being attacked, this file cannot be changed by admin UI.  This is useful when broader scoped grant policy, e.g. [grant all exec command access] is set in config.json.  It's hard to forsee all attacks, recommend to start the admin UI only when needed, and set OS level read access only to the policy files.",
+  "policies": [
+    {
+      "type": "deny",
+      "toolName": [
+        "exec"
+      ],
+      "sessionKey": [
+        "*"
+      ],
+      "condition": "params.command like '*fg-tool-access-control*'",
+      "desc": "Deny fg-tool-access-control related commands"
+    },
+    {
+      "type": "deny",
+      "toolName": [
+        "exec"
+      ],
+      "sessionKey": [
+        "*"
+      ],
+      "condition": "params.command like '*config_local_only*'",
+      "desc": "Deny any command related to admin UI's config URL"
+    },
+    {
+      "type": "deny",
+      "toolName": [
+        "edit"
+      ],
+      "sessionKey": [
+        "*"
+      ],
+      "condition": "params.file_path like '*openclaw.json*' and toString(params.newText) not_like '*fg-tool-access-control*'",
+      "desc": "Deny edit openclaw.json to remove fg-tool-access-control plugin"
+    },
+    {
+      "type": "deny",
+      "toolName": [
+        "edit",
+        "write"
+      ],
+      "sessionKey": [
+        "*"
+      ],
+      "condition": "params.file_path like '*fg-tool-access-control*' or params.path like '*fg-tool-access-control*'",
+      "desc": "Deny edit/write fg-tool-access-control plugin files"
+    }
+  ]
+}
